@@ -5,14 +5,15 @@ if (isset($_GET['id']) && isset($_GET['status'])) {
     $id = $_GET['id'];
     $status = $_GET['status'];
 
-    $sql = "UPDATE leave_request SET status = '$status' WHERE id = $id";
+    $sql = "UPDATE leave_request SET status='$status' WHERE id=$id";
 
-    if ($conn->query($sql)) {
-        echo "<p>Leave request $status successfully.</p>";
+    if ($conn->query($sql) === TRUE) {
+        header("Location: monitor.php"); // ✅ redirect back to the unified dashboard
+        exit();
     } else {
-        echo "<p>Error: " . $conn->error . "</p>";
+        echo "❌ Error updating request: " . $conn->error;
     }
-
-    echo "<p><a href='manage_leaves.php'>Go Back</a></p>";
+} else {
+    echo "❌ Missing parameters.";
 }
 ?>
