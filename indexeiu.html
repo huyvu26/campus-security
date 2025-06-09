@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>EIU CAMPUS</title>
+
+	<style></style>
+</head>
+<body>
+	<header>
+		<div class="top-header">
+			<div class="container">
+			 <div class="row">
+			 	<div class="col-md-4">
+			 		<img src="images/logo.jpg">
+			 	</div>
+			 	<div class="col-md-8">
+			 		<nav>
+			 			<ul>
+			 				<li><a href="">ABOUT US</a></li>
+			 				<li><a href="">NEWS</a></li>
+			                <li><a href="">POLICY</a></li>
+			 				<li><a href="login.php">LOGIN</a></li>
+			 				<li><a href="">JOIN IN</a></li>
+			 			</ul>
+			 		</nav>
+			 	</div>
+			 	
+			 </div>
+			</div>
+		</div>
+		
+	</header>
+	<section class="slider">
+	   
+	    	<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+		    <div class="carousel-indicators" id="carousel-indicators"></div>
+		    <div class="carousel-inner" id="carousel-inner"></div>
+		    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+		      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		      <span class="visually-hidden">Previous</span>
+		    </button>
+		    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+		      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+		      <span class="visually-hidden">Next</span>
+		    </button>
+		  </div>
+	   
+	</section>
+	<main>
+		<div class="news">
+			<div class="container">
+				
+				<div class="row">
+					<div class="col-md-6">
+					<h1>Welcome to ANHUY Security</h1>
+					<p>With our service you will become the real king because nobody can touch your hair even your're bald</p>
+				</div>
+				<div class="col-md-6">
+					<img src="images/news-1.jpg">
+				</div>
+				</div>
+			</div>
+		</div>
+	<section>
+			<div class="container">
+				<h1>OUR MEMBERS</h1>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="card">
+						  <img src="images/news-2.jpg" class="card-img-top" alt="...">
+						  <div class="card-body">
+						    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+						  </div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="card" >
+						 <img src="images/news-3.jpg" class="card-img-top" alt="...">
+						  <div class="card-body">
+						    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+						  </div>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="card">
+						  <img src="images/news-4.jpg" class="card-img-top" alt="...">
+						  <div class="card-body">
+						    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
+						  </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section> 
+		
+	</main>
+	<footer>
+	
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4">
+						<img src="images/logo.jpg">
+					</div>
+					<div class="col-md-4">
+						<h2>CONTACT US</h2>
+						<p><a href=""><i class="fa-brands fa-facebook"></i></a>
+						<a href=""><i class="fa-brands fa-instagram"></i></a>
+						 <a href=""><i class="fa-brands fa-square-twitter"></i></a></p>
+					</div>
+				
+					<div class="col-md-4">
+						<h2>MORE INFORMATION</h2>
+						<p><a href="">HOT NEWS</a></p>
+						<p><a href="">HOT JOBS</a></p>
+
+						
+					</div>
+				</div>
+			</div>
+	
+	</footer>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+	<script>
+
+		const slides = [
+		  {
+		    image: "images/slider-1.jpg",
+		   
+		  },
+		  {
+		    image: "images/slider-2.jpg",
+		 
+		  },
+		  {
+		    image: "images/slider-3.jpg",
+		   
+		  }
+		];
+
+		
+		const indicators = document.getElementById('carousel-indicators');
+		const inner = document.getElementById('carousel-inner');
+
+		slides.forEach((slide, index) => {
+		  
+		  const indicator = document.createElement('button');
+		  indicator.type = "button";
+		  indicator.setAttribute("data-bs-target", "#carouselExampleCaptions");
+		  indicator.setAttribute("data-bs-slide-to", index);
+		  indicator.className = index === 0 ? "active" : "";
+		  indicator.setAttribute("aria-label", `Slide ${index + 1}`);
+		  if (index === 0) indicator.setAttribute("aria-current", "true");
+		  indicators.appendChild(indicator);
+
+		
+		  const item = document.createElement('div');
+		  item.className = `carousel-item${index === 0 ? ' active' : ''}`;
+		  item.innerHTML = `
+		    <img src="${slide.image}" class="d-block w-100" alt="${slide.title}">
+		    `;
+		  inner.appendChild(item);
+		});
+	    
+</script>
+</body>
+</html>

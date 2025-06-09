@@ -7,11 +7,12 @@ if ($_SESSION['role'] != "manager") {
     exit();
 }
 
+$manager_id = $_SESSION['manager_id']; // ✅ get current manager's ID
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $staff_id = $_POST['staff_id'];
-    
+
     // Convert from dd/mm/yyyy to yyyy-mm-dd
     $date_parts = explode('/', $_POST['duty_date']);
     if (count($date_parts) === 3) {
@@ -91,6 +92,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border: 1px solid #ccc;
             box-sizing: border-box;
         }
+        select[name="place"] {
+            max-height: 140px;
+            overflow-y: auto;
+        }
         button {
             background-color: #108ABE;
             color: white;
@@ -110,7 +115,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <select name="staff_id" required>
         <option value="">-- Select Staff --</option>
         <?php
-        $staffs = $conn->query("SELECT id, name FROM security_staff");
+        // ✅ Only show staff belonging to current manager
+        $staffs = $conn->query("SELECT id, name FROM security_staff WHERE manager_id = $manager_id");
         while ($row = $staffs->fetch_assoc()) {
             echo "<option value='{$row['id']}'>{$row['name']}</option>";
         }
@@ -127,12 +133,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <input type="text" name="end_time" class="timepicker" required placeholder="HH:MM">
 
     <label>Place:</label>
-    <input type="text" name="place" required placeholder="e.g. Gate A, Lobby">
+    <select name="place" required>
+        <option value="">-- Select Place --</option>
+        <option>Building B08</option>
+        <option>Building B03</option>
+        <option>Building B10</option>
+        <option>Building B11</option>
+        <option>Library</option>
+        <option>Main Hall</option>
+        <option>Canteen</option>
+        <option>Parking Lot</option>
+        <option>Main Gate</option>
+        <option>Side Gate</option>
+    </select>
 
     <button type="submit">Assign Duty</button>
 </form>
 
-<!-- Flatpickr Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
   flatpickr(".datepicker", {

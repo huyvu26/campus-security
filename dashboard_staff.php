@@ -11,36 +11,29 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] !== 'staff') {
 
 $staff_name = $_SESSION['user'];
 $staff_id = $_SESSION['staff_id'];
-$week_offset = isset($_GET['week_offset']) ? (int)$_GET['week_offset'] : 0;
 
-// Calculate Monday to Sunday range
-$monday = date('Y-m-d', strtotime("monday +{$week_offset} week"));
-$sunday = date('Y-m-d', strtotime("sunday +{$week_offset} week"));
+// This week range
+$monday = date('Y-m-d', strtotime('monday this week'));
+$sunday = date('Y-m-d', strtotime('sunday this week'));
 
-$salary_per_duty = 500000;
-$overtime_bonus = 100000;
-$max_allowed_leaves = 3;
-$leave_penalty = 100000;
-
-// Duties in the selected week
-$duties_result = $conn->query("SELECT * FROM duty 
-    WHERE staff_id = $staff_id 
-    AND duty_date BETWEEN '$monday' AND '$sunday' 
-    ORDER BY duty_date ASC");
+// Duties this week
+$duties_result = $conn->query("SELECT * FROM duty WHERE staff_id = $staff_id AND duty_date BETWEEN '$monday' AND '$sunday'");
 $duties_list = [];
 while ($row = $duties_result->fetch_assoc()) {
     $duties_list[] = $row;
 }
 
 // Stats
-$today = date('Y-m-d');
-$total_jobs = count($duties_list);
 $active_staff = $conn->query("SELECT COUNT(*) AS total FROM security_staff")->fetch_assoc()['total'];
-$completed_today = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $staff_id AND duty_date = '$today'")->fetch_assoc()['total'];
 
-// Salary
+// Monthly Salary
+$salary_per_duty = 500000;
+$overtime_bonus = 100000;
+$leave_penalty = 100000;
+$max_allowed_leaves = 3;
 $month = date('m');
 $year = date('Y');
+
 $duties_done = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $staff_id AND MONTH(duty_date) = $month AND YEAR(duty_date) = $year")->fetch_assoc()['total'];
 $approved_leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $staff_id AND type = 'Leave' AND status = 'Approved' AND MONTH(leave_date) = $month AND YEAR(leave_date) = $year")->fetch_assoc()['total'];
 $approved_ot = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $staff_id AND type = 'Overtime' AND status = 'Approved' AND MONTH(leave_date) = $month AND YEAR(leave_date) = $year")->fetch_assoc()['total'];
@@ -51,7 +44,32 @@ $extra_leaves = max(0, $approved_leaves - $max_allowed_leaves);
 $penalty = $extra_leaves * $leave_penalty;
 $final_salary = $base_salary + $bonus - $penalty;
 
+$leaves_taken = $approved_leaves;
+$leaves_remaining = max(0, $max_allowed_leaves - $leaves_taken);
+
 $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id ORDER BY leave_date DESC");
+
+// Salary History for Chart
+$salary_history = [];
+for ($i = 5; $i >= 0; $i--) {
+    $m = date('m', strtotime("-$i months"));
+    $y = date('Y', strtotime("-$i months"));
+    $label = date('M Y', strtotime("-$i months"));
+
+    $duties = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $staff_id AND MONTH(duty_date) = $m AND YEAR(duty_date) = $y")->fetch_assoc()['total'];
+    $leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $staff_id AND type='Leave' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
+    $ots = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $staff_id AND type='Overtime' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
+
+    $base = $duties * $salary_per_duty;
+    $ot_bonus = $ots * $overtime_bonus;
+    $pen = max(0, $leaves - $max_allowed_leaves) * $leave_penalty;
+    $final = $base + $ot_bonus - $pen;
+
+    $salary_history[] = [
+        'label' => $label,
+        'amount' => $final
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -59,6 +77,7 @@ $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id
 <head>
   <meta charset="UTF-8">
   <title>Campus Staff Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(to right, #e0eafc, #cfdef3); display: flex; min-height: 100vh; }
@@ -77,11 +96,13 @@ $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id
     .stat-title { font-size: 14px; color: #777; }
     .stat-value { font-size: 24px; font-weight: bold; margin-top: 10px; color: #333; }
     .section { margin-top: 40px; }
+    .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: center; }
-    .button { padding: 10px 15px; background: #108ABE; color: white; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 15px; }
-    .week-nav { margin-top: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-    .week-nav a { padding: 6px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: center; }
+    th { background-color: #f1f5f9; font-weight: 600; }
+    .stat { font-size: 16px; margin: 8px 0; }
+    .stat strong { color: #1e293b; }
+    .highlight { font-weight: bold; color: #0d47a1; }
   </style>
 </head>
 <body>
@@ -95,15 +116,19 @@ $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id
 <div class="dashboard">
   <h1>Weekly Duty Schedule (<?= date('d M', strtotime($monday)) ?> - <?= date('d M Y', strtotime($sunday)) ?>)</h1>
 
-  <div class="week-nav">
-    <a href="?week_offset=<?= $week_offset - 1 ?>">&larr; Previous</a>
-    <a href="?week_offset=<?= $week_offset + 1 ?>">Next &rarr;</a>
-  </div>
-
   <div class="stats-bar">
-    <div class="stat-card"><div class="stat-title">Total Jobs</div><div class="stat-value"><?= $total_jobs ?></div></div>
-    <div class="stat-card"><div class="stat-title">Active Staff</div><div class="stat-value"><?= $active_staff ?></div></div>
-    <div class="stat-card"><div class="stat-title">Completed Today</div><div class="stat-value"><?= $completed_today ?></div></div>
+    <div class="stat-card">
+      <div class="stat-title">Active Staff</div>
+      <div class="stat-value"><?= $active_staff ?></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Leaves Taken (This Month)</div>
+      <div class="stat-value"><?= $leaves_taken ?></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Leaves Remaining</div>
+      <div class="stat-value"><?= $leaves_remaining ?></div>
+    </div>
   </div>
 
   <div class="week-grid section">
@@ -116,7 +141,7 @@ $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id
         $found = false;
         foreach ($duties_list as $d) {
             if ($d['duty_date'] == $date) {
-                echo "<div class='job-task'>{$d['place']} - {$d['start_time']}</div>";
+                echo "<div class='job-task'>{$d['place']} - {$d['start_time']} to {$d['end_time']}</div>";
                 $found = true;
             }
         }
@@ -127,28 +152,71 @@ $requests = $conn->query("SELECT * FROM leave_request WHERE staff_id = $staff_id
   </div>
 
   <div class="section">
-    <h2>Your Leave & OT Requests</h2>
-    <?php if ($requests->num_rows > 0): ?>
-      <table><tr><th>Date</th><th>Type</th><th>Status</th></tr>
-      <?php while ($r = $requests->fetch_assoc()): ?>
-        <tr><td><?= $r['leave_date'] ?></td><td><?= $r['type'] ?></td><td><?= $r['status'] ?></td></tr>
-      <?php endwhile; ?>
-      </table>
-    <?php else: ?>
-      <p>No requests found.</p>
-    <?php endif; ?>
+    <h2 style="cursor:pointer;" onclick="toggleRequests()">Your Leave & OT Requests <span id="toggle-icon">▼</span></h2>
+    <div class="card" id="requests-section">
+      <?php if ($requests->num_rows > 0): ?>
+        <table>
+          <tr><th>Date</th><th>Type</th><th>Status</th></tr>
+          <?php while ($r = $requests->fetch_assoc()): ?>
+            <tr><td><?= $r['leave_date'] ?></td><td><?= $r['type'] ?></td><td><?= $r['status'] ?></td></tr>
+          <?php endwhile; ?>
+        </table>
+      <?php else: ?>
+        <p>No requests found.</p>
+      <?php endif; ?>
+    </div>
   </div>
+
+  <script>
+    function toggleRequests() {
+      const section = document.getElementById("requests-section");
+      const icon = document.getElementById("toggle-icon");
+      section.style.display = (section.style.display === "none") ? "block" : "none";
+      icon.textContent = (icon.textContent === "▼") ? "▲" : "▼";
+    }
+  </script>
 
   <div class="section">
     <h2>Monthly Salary</h2>
-    <p>Duties Completed: <?= $duties_done ?></p>
-    <p>Approved Leaves: <?= $approved_leaves ?></p>
-    <p>Approved Overtime: <?= $approved_ot ?></p>
-    <p>Overtime Bonus: <?= number_format($bonus) ?> VND</p>
-    <p>Penalty: <?= number_format($penalty) ?> VND</p>
-    <p><strong>Total Salary: <?= number_format($final_salary) ?> VND</strong></p>
+    <div class="card">
+      <p class="stat">Duties Completed: <strong><?= $duties_done ?></strong></p>
+      <p class="stat">Approved Leaves: <strong><?= $approved_leaves ?></strong></p>
+      <p class="stat">Approved Overtime: <strong><?= $approved_ot ?></strong></p>
+      <p class="stat">Overtime Bonus: <strong><?= number_format($bonus) ?> VND</strong></p>
+      <p class="stat">Penalty: <strong><?= number_format($penalty) ?> VND</strong></p>
+      <p class="stat highlight">Total Salary: <strong><?= number_format($final_salary) ?> VND</strong></p>
+    </div>
+
+    <canvas id="salaryChart" height="100"></canvas>
+    <script>
+      const ctx = document.getElementById('salaryChart').getContext('2d');
+      const salaryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: <?= json_encode(array_column($salary_history, 'label')) ?>,
+          datasets: [{
+            label: 'Monthly Salary (VND)',
+            data: <?= json_encode(array_column($salary_history, 'amount')) ?>,
+            borderColor: '#0d47a1',
+            backgroundColor: 'rgba(13,71,161,0.08)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: value => value.toLocaleString() + ' VND'
+              }
+            }
+          }
+        }
+      });
+    </script>
   </div>
 </div>
-
 </body>
 </html>

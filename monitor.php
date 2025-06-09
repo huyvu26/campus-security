@@ -9,6 +9,7 @@ if ($_SESSION['role'] != "manager") {
     exit();
 }
 
+$manager_id = $_SESSION['manager_id'];
 $salary_per_duty = 500000;
 $overtime_bonus = 100000;
 $leave_penalty = 100000;
@@ -25,6 +26,7 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Manager Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: #f0f4f8; }
     .dashboard-container { display: flex; height: 100vh; }
@@ -51,13 +53,14 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
     <h2>Manager</h2>
     <a href="monitor.php">Dashboard</a>
     <a href="create_duty.php">Assign Duty</a>
+    <a href="assign_staff.php">Assign Staff</a>
     <a href="logout.php">Logout</a>
   </div>
 
   <div class="dashboard">
     <div class="topbar">Monitoring & Salary Dashboard</div>
 
-    <!-- Salary Section -->
+    <!-- Salary Summary -->
     <div class="section">
       <h3>Monthly Salary Summary</h3>
       <table>
@@ -70,7 +73,8 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
           <th>Salary</th>
         </tr>
         <?php
-        $staff_result = $conn->query("SELECT id, name FROM security_staff");
+        $staff_result = $conn->query("SELECT id, name FROM security_staff WHERE manager_id = $manager_id");
+
         while ($staff = $staff_result->fetch_assoc()) {
             $id = $staff['id'];
             $name = $staff['name'];
@@ -98,7 +102,7 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
       </table>
     </div>
 
-    <!-- Optional Duty View Section -->
+    <!-- Optional Duties and Salary Chart -->
     <?php
     if ($selected_staff_id) {
         $staff = $conn->query("SELECT name FROM security_staff WHERE id = $selected_staff_id")->fetch_assoc();
@@ -125,6 +129,32 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
             echo "<p>No duties assigned for this staff.</p>";
         }
         echo "</div>";
+
+        // Get salary history
+        $labels = [];
+        $salary_data = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $target_month = date('m', strtotime("-$i months"));
+            $target_year = date('Y', strtotime("-$i months"));
+            $label = date('M Y', strtotime("-$i months"));
+            $labels[] = $label;
+
+            $duties = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $selected_staff_id AND MONTH(duty_date) = $target_month AND YEAR(duty_date) = $target_year")->fetch_assoc()['total'];
+            $ot = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Overtime' AND status='Approved' AND MONTH(leave_date) = $target_month AND YEAR(leave_date) = $target_year")->fetch_assoc()['total'];
+            $leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Leave' AND status='Approved' AND MONTH(leave_date) = $target_month AND YEAR(leave_date) = $target_year")->fetch_assoc()['total'];
+
+            $salary = ($duties * $salary_per_duty) + ($ot * $overtime_bonus) - (max(0, $leaves - $max_allowed_leaves) * $leave_penalty);
+            $salary_data[] = $salary;
+        }
+
+        $json_labels = json_encode($labels);
+        $json_data = json_encode($salary_data);
+
+        echo "<div class='section'>
+                <h3>Monthly Salary History</h3>
+                <canvas id='salaryChart' width='400' height='150'></canvas>
+              </div>";
     }
     ?>
 
@@ -137,7 +167,7 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
         $pending = $conn->query("SELECT lr.id, ss.name, lr.leave_date, lr.type 
                                  FROM leave_request lr 
                                  JOIN security_staff ss ON lr.staff_id = ss.id 
-                                 WHERE lr.status = 'Pending' 
+                                 WHERE lr.status = 'Pending' AND ss.manager_id = $manager_id 
                                  ORDER BY lr.leave_date DESC");
 
         if ($pending->num_rows > 0) {
@@ -160,6 +190,37 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
     </div>
   </div>
 </div>
+
+<?php if ($selected_staff_id): ?>
+<script>
+  const ctx = document.getElementById('salaryChart').getContext('2d');
+  const salaryChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: <?= $json_labels ?>,
+      datasets: [{
+        label: 'Monthly Salary (VND)',
+        data: <?= $json_data ?>,
+        borderColor: '#108ABE',
+        backgroundColor: 'rgba(16,138,190,0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => value.toLocaleString() + ' VND'
+          }
+        }
+      }
+    }
+  });
+</script>
+<?php endif; ?>
 
 </body>
 </html>

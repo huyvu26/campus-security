@@ -10,17 +10,15 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
     $role     = $_POST['role'];
 
-    // Make sure role is selected
     if (empty($role)) {
         $error = "❌ Please select a role.";
     } else {
-        // Set query and redirect based on role
         if ($role == "staff") {
             $sql = "SELECT * FROM security_staff WHERE email='$email'";
             $redirect = "dashboard_staff.php";
         } elseif ($role == "manager") {
             $sql = "SELECT * FROM manager WHERE email='$email'";
-            $redirect = "monitor.php";  // ✅ your updated dashboard
+            $redirect = "monitor.php";
         }
 
         $result = $conn->query($sql);
@@ -31,6 +29,9 @@ if (isset($_POST['login'])) {
                 $_SESSION['user'] = $row['name'];
                 $_SESSION['role'] = $role;
                 $_SESSION['staff_id'] = $row['id'];
+                if ($role === "manager") {
+                    $_SESSION['manager_id'] = $row['id']; // ✅ add manager_id to session
+                }
                 header("Location: $redirect");
                 exit();
             } else {
@@ -41,8 +42,8 @@ if (isset($_POST['login'])) {
         }
     }
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html>
