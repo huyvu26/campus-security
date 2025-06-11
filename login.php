@@ -1,6 +1,6 @@
 <?php
-ini_set('session.gc_maxlifetime', 3600);  // 1 hour
-session_set_cookie_params(3600);          // 1 hour cookie
+ini_set('session.gc_maxlifetime', 3600);
+session_set_cookie_params(3600);
 
 session_start();
 include 'db.php';
@@ -30,7 +30,7 @@ if (isset($_POST['login'])) {
                 $_SESSION['role'] = $role;
                 $_SESSION['staff_id'] = $row['id'];
                 if ($role === "manager") {
-                    $_SESSION['manager_id'] = $row['id']; // ✅ add manager_id to session
+                    $_SESSION['manager_id'] = $row['id'];
                 }
                 header("Location: $redirect");
                 exit();
@@ -43,88 +43,95 @@ if (isset($_POST['login'])) {
     }
 }
 ?>
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        * { margin: 0; padding: 0; }
-        body {
-            background: radial-gradient(circle, rgba(209, 203, 203, 1) 0%, rgba(148, 187, 233, 1) 100%);
-            font-family: Arial;
-        }
-        h1 {
-            text-align: center;
-            padding-top: 50px;
-            padding-bottom: 50px;
-            font-size: 50px;
-            color: #006d77;
-        }
-        h3 {
-            text-align: center;
-            padding-top: 30px;
-            font-size: x-large;
-        }
-        form {
-            border: 4px solid rgb(169, 84, 0);
-            border-radius: 15px;
-            margin: auto;
-            width: 400px;
-            height: 500px;
-            box-shadow: 10px 10px 10px rgb(169, 84, 0);
-            background-color: rgb(240, 233, 228);
-        }
-        input, select, button {
-            display: block;
-            height: 40px;
-            width: 90%;
-            margin: 10px auto;
-            padding: 0 10px;
-            border: 1px solid blue;
-            border-radius: 25px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #108ABE;
-            color: white;
-            font-weight: bold;
-        }
-        #registerbtn {
-            width: 50%;
-            background-color: #70acb3;
-        }
-        .dashed-line {
-            width: 85%;
-            height: 1px;
-            border-top: 2px dashed #c4801b;
-            margin: 20px auto;
-        }
-        .error {
-            text-align: center;
-            color: red;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Login - Campus Security</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px 35px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 {
+      color: #0d47a1;
+      font-size: 26px;
+      margin-bottom: 30px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #108ABE;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0b6c92;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .register-link {
+      display: block;
+      margin-top: 25px;
+      color: #108ABE;
+      font-size: 15px;
+      text-decoration: none;
+    }
+    .register-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>Campus Security Staff Management System</h1>
 
-    <form method="post">
-        <h3>Login</h3>
-        <?php if (isset($error)) echo "<div class='error'>$error</div>"; ?>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <select name="role" required>
-            <option value="">Select Role</option>
-            <option value="staff">Security Staff</option>
-            <option value="manager">Manager</option>
-        </select>
-        <button type="submit" name="login">Enter</button>
-        <div class="dashed-line"></div>
-        <a href="register.php"><button type="button" id="registerbtn">Register an account</button></a>
-    </form>
+<div class="login-container">
+  <h1>Campus Security Login</h1>
+  <?php if (isset($error)) echo "<div class='error'>$error</div>"; ?>
+
+  <form method="post">
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <select name="role" required>
+      <option value="">Select Role</option>
+      <option value="staff">Security Staff</option>
+      <option value="manager">Manager</option>
+    </select>
+    <button type="submit" name="login">Login</button>
+  </form>
+
+  <a class="register-link" href="register.php">Don't have an account? Register</a>
+</div>
+
 </body>
 </html>

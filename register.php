@@ -21,121 +21,140 @@ if (isset($_POST['register'])) {
     }
 
     if ($conn->query($sql)) {
-        echo "<p style='text-align:center; color:green;'>✅ Registered successfully!</p>";
+        $message = "<p class='success'>✅ Registered successfully!</p>";
     } else {
-        echo "<p style='text-align:center; color:red;'>❌ Error: " . $conn->error . "</p>";
+        $message = "<p class='error'>❌ Error: " . $conn->error . "</p>";
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register</title>
-    <style>
-        * { margin: 0px; padding: 0px; }
-        body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  <meta charset="UTF-8" />
+  <title>Register - Campus Security</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        .form-container { margin-top: 50px; }
-        .form-header { text-align: center; padding: 10px 0; }
+    .form-box {
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 450px;
+    }
 
-        .mid-form {
-            display: block;
-            box-sizing: border-box;
-            border: 4px solid rgb(169, 84, 0);
-            border-radius: 15px;
-            margin: auto;
-            box-shadow: 10px 10px 10px rgb(169, 84, 0);
-            width: 400px;
-            background-color: rgb(240, 233, 228);
-            padding: 30px 20px;
-        }
+    .form-box h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #0d47a1;
+    }
 
-        .form-group { padding: 10px 0; text-align: center; }
-        input, select {
-            height: 40px;
-            width: 90%;
-            margin-bottom: 10px;
-            border: 1px solid black;
-            border-radius: 15px;
-            text-align: center;
-        }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
 
-        .gender-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
+    .radio-group {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
 
-        .gender-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
-            border: 1px solid rgb(169, 84, 0);
-            border-radius: 15px;
-            background-color: #fff;
-            cursor: pointer;
-        }
+    .radio-group label {
+      display: flex;
+      align-items: baseline; /* change from center to baseline */
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+}
+    .radio-group input[type="radio"] {
+      transform: translateY(1px); /* fine-tune if needed */
+}
 
-        .submit-btn {
-            text-align: center;
-            margin-top: 20px;
-        }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #108ABE;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-        button[type="submit"] {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 15px;
-            background-color: rgb(169, 84, 0);
-            color: white;
-            cursor: pointer;
-        }
-    </style>
+    button:hover {
+      background-color: #0b6c92;
+    }
+
+    .error, .success {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .error { color: red; }
+    .success { color: green; }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #108ABE;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
 
-<div class="form-container">
-    <div class="mid-form">
-        <div class="form-header">
-            <h1>Register Form</h1>
-        </div>
-        <form method="post">
-            <div class="form-group">
-                <input type="text" name="first_name" placeholder="First name" required>
-                <input type="text" name="last_name" placeholder="Last name">
-            </div>
-            <div class="form-group">
-                <input type="text" name="identity_number" placeholder="Identity Number" required>
-            </div>
-            <div class="form-group">
-                <input type="email" name="email" placeholder="Email address" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Password" required>
-            </div>
-            <div class="form-group">
-                <input type="date" name="dob" required>
-            </div>
-            <div class="gender-container">
-                <label class="gender-option">
-                    <input type="radio" name="gender" value="female" required> Female
-                </label>
-                <label class="gender-option">
-                    <input type="radio" name="gender" value="male" required> Male
-                </label>
-            </div>
-            <div class="form-group">
-                <select name="role" required>
-                    <option value="">Select Role</option>
-                    <option value="staff">Security Staff</option>
-                    <option value="manager">Manager</option>
-                </select>
-            </div>
-            <div class="submit-btn">
-                <button type="submit" name="register">Register</button>
-            </div>
-        </form>
+<div class="form-box">
+  <h1>Register</h1>
+  <?php if (isset($message)) echo $message; ?>
+
+  <form method="post">
+    <input type="text" name="first_name" placeholder="First Name" required>
+    <input type="text" name="last_name" placeholder="Last Name">
+    <input type="text" name="identity_number" placeholder="Identity Number" required>
+    <input type="email" name="email" placeholder="Email Address" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="date" name="dob" required>
+
+    <div class="radio-group">
+      <label><input type="radio" name="gender" value="male" required> Male</label>
+      <label><input type="radio" name="gender" value="female" required> Female</label>
     </div>
+
+    <select name="role" required>
+      <option value="">Select Role</option>
+      <option value="staff">Security Staff</option>
+      <option value="manager">Manager</option>
+    </select>
+
+    <button type="submit" name="register">Register</button>
+  </form>
+
+  <a href="login.php" class="back-link">Back to Login</a>
 </div>
 
 </body>

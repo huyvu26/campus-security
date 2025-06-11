@@ -148,6 +148,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </select>
 
     <button type="submit">Assign Duty</button>
+    <div style="text-align: center; margin-top: 10px;">
+      <a href="monitor.php" style="text-decoration: none; color: #108ABE; font-weight: bold;">
+           Back to Dashboard
+      </a>
+    </div>
 </form>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

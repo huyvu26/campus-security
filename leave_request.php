@@ -124,6 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <input type="text" name="reason" placeholder="Reason (optional)">
 
     <button type="submit">Submit Request</button>
+    <div style="text-align: center; margin-top: 10px;">
+      <a href="dashboard_staff.php" style="text-decoration: none; color: #108ABE; font-weight: bold;">
+           Back to Dashboard
+      </a>
+    </div>
 </form>
 
 <!-- Flatpickr -->

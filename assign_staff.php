@@ -112,6 +112,11 @@ $staff_result = $conn->query("SELECT id, name FROM security_staff WHERE manager_
     </select>
 
     <button type="submit">Assign</button>
+    <div style="text-align: center; margin-top: 10px;">
+      <a href="monitor.php" style="text-decoration: none; color: #108ABE; font-weight: bold;">
+           Back to Dashboard
+      </a>
+    </div>
   </form>
 </div>
 

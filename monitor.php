@@ -54,6 +54,7 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
     <a href="monitor.php">Dashboard</a>
     <a href="create_duty.php">Assign Duty</a>
     <a href="assign_staff.php">Assign Staff</a>
+    <a href="total_salary.php">Total Salary</a>
     <a href="logout.php">Logout</a>
   </div>
 
