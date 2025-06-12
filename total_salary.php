@@ -12,9 +12,40 @@ $salary_per_duty = 500000;
 $overtime_bonus = 100000;
 $leave_penalty = 100000;
 $max_allowed_leaves = 3;
+
 $month = date('m');
 $year = date('Y');
 $total_cost = 0;
+
+// ✅ Build salary history for chart
+$total_salary_history = [];
+for ($i = 5; $i >= 0; $i--) {
+    $m = date('m', strtotime("-$i months"));
+    $y = date('Y', strtotime("-$i months"));
+    $label = date('M Y', strtotime("-$i months"));
+
+    $staffs = $conn->query("SELECT id FROM security_staff WHERE manager_id = $manager_id");
+    $total_salary = 0;
+
+    while ($s = $staffs->fetch_assoc()) {
+        $sid = $s['id'];
+
+        $duties = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $sid AND MONTH(duty_date) = $m AND YEAR(duty_date) = $y")->fetch_assoc()['total'];
+        $leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $sid AND type='Leave' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
+        $ots = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $sid AND type='Overtime' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
+
+        $base = $duties * $salary_per_duty;
+        $bonus = $ots * $overtime_bonus;
+        $penalty = max(0, $leaves - $max_allowed_leaves) * $leave_penalty;
+
+        $total_salary += $base + $bonus - $penalty;
+    }
+
+    $total_salary_history[] = [
+        'label' => $label,
+        'amount' => $total_salary
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -22,6 +53,7 @@ $total_cost = 0;
 <head>
   <meta charset="UTF-8">
   <title>Total Monthly Salary</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial; margin: 0; background-color: #f2f4f8; }
     .container { display: flex; }
@@ -73,6 +105,14 @@ $total_cost = 0;
     tr:last-child td {
       font-weight: bold;
       background-color: #f9fafb;
+    }
+
+    .chart-section {
+      background-color: white;
+      margin-top: 40px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
     }
   </style>
 </head>
@@ -129,7 +169,44 @@ $total_cost = 0;
         <td><strong style="color:#0d47a1;"><?= number_format($total_cost) ?> VND</strong></td>
       </tr>
     </table>
+
+    <div class="chart-section">
+      <h3>Total Salary Paid (Last 6 Months)</h3>
+      <canvas id="totalSalaryChart" height="100"></canvas>
+    </div>
   </div>
 </div>
+
+<script>
+  const ctx = document.getElementById('totalSalaryChart').getContext('2d');
+  const totalSalaryChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: <?= json_encode(array_column($total_salary_history, 'label')) ?>,
+      datasets: [{
+        label: 'Total Salary (VND)',
+        data: <?= json_encode(array_column($total_salary_history, 'amount')) ?>,
+        borderColor: '#0d47a1',
+        backgroundColor: 'rgba(13,71,161,0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => value.toLocaleString() + ' VND'
+          }
+        }
+      }
+    }
+  });
+</script>
 </body>
 </html>

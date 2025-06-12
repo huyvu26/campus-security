@@ -18,6 +18,9 @@ $month = date('m');
 $year = date('Y');
 
 $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) : null;
+
+// Active staff count
+$active_staff = $conn->query("SELECT COUNT(*) AS total FROM security_staff WHERE manager_id = $manager_id")->fetch_assoc()['total'];
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +38,28 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
     .sidebar a { color: white; text-decoration: none; margin-bottom: 15px; display: block; padding: 8px 10px; border-radius: 5px; }
     .sidebar a:hover { background-color: #334155; }
     .dashboard { flex: 1; padding: 30px; overflow-y: auto; }
-    .topbar { background-color: white; padding: 15px 30px; margin-bottom: 20px; font-weight: bold; font-size: 22px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .topbar {
+      background-color: white;
+      padding: 15px 30px;
+      margin-bottom: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .active-staff {
+      font-size: 16px;
+      color: #0d47a1;
+      background-color: #e0ecff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
     .section { background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eaeaea; }
@@ -59,7 +83,10 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
   </div>
 
   <div class="dashboard">
-    <div class="topbar">Monitoring & Salary Dashboard</div>
+    <div class="topbar">
+      Monitoring & Salary Dashboard
+      <div class="active-staff">Active Staff: <?= $active_staff ?></div>
+    </div>
 
     <!-- Salary Summary -->
     <div class="section">
@@ -103,11 +130,11 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
       </table>
     </div>
 
-    <!-- Optional Duties and Salary Chart -->
-    <?php
-    if ($selected_staff_id) {
+    <!-- Staff Duty Detail (if selected) -->
+    <?php if ($selected_staff_id): ?>
+      <div class="section">
+        <?php
         $staff = $conn->query("SELECT name FROM security_staff WHERE id = $selected_staff_id")->fetch_assoc();
-        echo "<div class='section'>";
         echo "<h3>Assigned Duties for {$staff['name']}</h3>";
 
         $duties = $conn->query("SELECT duty_date, start_time, end_time, place FROM duty 
@@ -129,37 +156,33 @@ $selected_staff_id = isset($_GET['view_duties']) ? intval($_GET['view_duties']) 
         } else {
             echo "<p>No duties assigned for this staff.</p>";
         }
-        echo "</div>";
 
-        // Get salary history
+        // Salary chart data
         $labels = [];
         $salary_data = [];
-
         for ($i = 5; $i >= 0; $i--) {
-            $target_month = date('m', strtotime("-$i months"));
-            $target_year = date('Y', strtotime("-$i months"));
+            $m = date('m', strtotime("-$i months"));
+            $y = date('Y', strtotime("-$i months"));
             $label = date('M Y', strtotime("-$i months"));
             $labels[] = $label;
 
-            $duties = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $selected_staff_id AND MONTH(duty_date) = $target_month AND YEAR(duty_date) = $target_year")->fetch_assoc()['total'];
-            $ot = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Overtime' AND status='Approved' AND MONTH(leave_date) = $target_month AND YEAR(leave_date) = $target_year")->fetch_assoc()['total'];
-            $leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Leave' AND status='Approved' AND MONTH(leave_date) = $target_month AND YEAR(leave_date) = $target_year")->fetch_assoc()['total'];
+            $duties = $conn->query("SELECT COUNT(*) AS total FROM duty WHERE staff_id = $selected_staff_id AND MONTH(duty_date) = $m AND YEAR(duty_date) = $y")->fetch_assoc()['total'];
+            $leaves = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Leave' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
+            $ots = $conn->query("SELECT COUNT(*) AS total FROM leave_request WHERE staff_id = $selected_staff_id AND type='Overtime' AND status='Approved' AND MONTH(leave_date) = $m AND YEAR(leave_date) = $y")->fetch_assoc()['total'];
 
-            $salary = ($duties * $salary_per_duty) + ($ot * $overtime_bonus) - (max(0, $leaves - $max_allowed_leaves) * $leave_penalty);
+            $salary = ($duties * $salary_per_duty) + ($ots * $overtime_bonus) - (max(0, $leaves - $max_allowed_leaves) * $leave_penalty);
             $salary_data[] = $salary;
         }
 
         $json_labels = json_encode($labels);
         $json_data = json_encode($salary_data);
+        ?>
+        <h3 style="margin-top: 30px;">Monthly Salary History</h3>
+        <canvas id="salaryChart" width="400" height="150"></canvas>
+      </div>
+    <?php endif; ?>
 
-        echo "<div class='section'>
-                <h3>Monthly Salary History</h3>
-                <canvas id='salaryChart' width='400' height='150'></canvas>
-              </div>";
-    }
-    ?>
-
-    <!-- Leave/OT Approval Section -->
+    <!-- Leave/OT Requests -->
     <div class="section">
       <h3>Pending Leave/Overtime Requests</h3>
       <table>
