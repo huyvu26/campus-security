@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 12, 2025 at 12:14 PM
+-- Generation Time: Jun 12, 2025 at 04:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -58,7 +58,9 @@ INSERT INTO `duty` (`id`, `staff_id`, `duty_date`, `start_time`, `end_time`, `pl
 (32, 6, '2025-06-12', '07:00:00', '16:00:00', 'Parking Lot', NULL),
 (33, 7, '2025-06-11', '07:00:00', '17:00:00', 'Canteen', NULL),
 (34, 8, '2025-06-11', '07:00:00', '17:00:00', 'Side Gate', NULL),
-(35, 9, '2025-06-11', '07:00:00', '17:00:00', 'Library', NULL);
+(35, 9, '2025-06-11', '07:00:00', '17:00:00', 'Library', NULL),
+(36, 10, '2025-06-12', '07:00:00', '17:00:00', 'Building B11', NULL),
+(37, 6, '2025-06-18', '07:00:00', '16:00:00', 'Side Gate', NULL);
 
 -- --------------------------------------------------------
 
@@ -85,7 +87,13 @@ INSERT INTO `leave_request` (`id`, `staff_id`, `leave_date`, `type`, `status`, `
 (35, 5, '2025-06-05', 'Leave', 'Approved', 'Sickness', NULL),
 (36, 5, '2025-06-06', 'Leave', 'Approved', 'Sickness', NULL),
 (43, 5, '2025-06-16', 'Overtime', 'Approved', '', NULL),
-(44, 5, '2025-06-12', 'Overtime', 'Approved', '', NULL);
+(44, 5, '2025-06-12', 'Overtime', 'Approved', '', NULL),
+(45, 10, '2025-06-13', 'Leave', 'Approved', 'Sickness', NULL),
+(46, 10, '2025-06-14', 'Overtime', 'Approved', 'need more money', NULL),
+(47, 10, '2025-06-16', 'Leave', 'Approved', 'Sickness', NULL),
+(48, 10, '2025-06-17', 'Leave', 'Approved', 'Sickness', NULL),
+(49, 10, '2025-06-18', 'Leave', 'Approved', 'Sickness', NULL),
+(50, 6, '2025-06-27', 'Leave', 'Approved', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -137,7 +145,8 @@ INSERT INTO `security_staff` (`id`, `identity_number`, `name`, `email`, `passwor
 (6, '003', 'Thu Nguyen', 'thunguyen@gmail.com', '$2y$10$Z4cNiCNSTEH6LF8.9.QK0en3L8i7t8qIGmbvwjm8qAptvpHT7Fd.e', 'female', '2004-03-29', 2),
 (7, '004', 'Tien  Phan', 'tienphan@gmail.com', '$2y$10$9wqueRe5MWjE.vNMYMvhsO4lcUEZk8MA0E9hCyge5BMjMgqmTmXUi', 'male', '1999-12-31', 3),
 (8, '005', 'Ngoc Ha', 'ngocha@gmail.com', '$2y$10$tIHWI0.iP08q/ZRQRYmGsu3QoQ9zIRcfYKT4l6Dm9CkKnzcSJuVQq', 'male', '2025-05-29', 3),
-(9, '006', 'Dai Nguyen', 'dainguyen@gmail.com', '$2y$10$5vRyQcDasTyQFT6YrouKHe7iHl9ajPtha2EySuLis38bEhczTFKkq', 'male', '1990-06-04', 3);
+(9, '006', 'Dai Nguyen', 'dainguyen@gmail.com', '$2y$10$5vRyQcDasTyQFT6YrouKHe7iHl9ajPtha2EySuLis38bEhczTFKkq', 'male', '1990-06-04', 3),
+(10, '008', 'Nam Nguyen', 'namnguyen@gmail.com', '$2y$10$17haZl.Z7o3DUh.tPahx9.5TEBcPONwbcP13oKWuNaZ4dCpZWUPvq', 'male', '2002-10-12', 2);
 
 --
 -- Indexes for dumped tables
@@ -184,25 +193,25 @@ ALTER TABLE `security_staff`
 -- AUTO_INCREMENT for table `duty`
 --
 ALTER TABLE `duty`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `leave_request`
 --
 ALTER TABLE `leave_request`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `manager`
 --
 ALTER TABLE `manager`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `security_staff`
 --
 ALTER TABLE `security_staff`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
