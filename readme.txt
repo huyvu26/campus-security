@@ -24,8 +24,8 @@ INFORMATION OF ACCOUNTS:
 1/ MANAGER  USERNAME: huyvu@gmail.com, PASSWORD: huyvu001
 2/ MANAGER  USERNAME: vole@gmail.com, PASSWORD: vole007
 3/ STAFF    USERNAME: anhpham@gmail.com, PASSWORD: anhpham002
-3/ STAFF    USERNAME: thunguyen@gmail.com, PASSWORD: thunguyen003
-3/ STAFF    USERNAME: tienphan@gmail.com, PASSWORD: tienphan004
-3/ STAFF    USERNAME: ngocha@gmail.com, PASSWORD: ngocha005
-3/ STAFF    USERNAME: dainguyen@gmail.com, PASSWORD: dainguyen006
-3/ STAFF    USERNAME: namnguyen@gmail.com, PASSWORD: namnguyen008
+4/ STAFF    USERNAME: thunguyen@gmail.com, PASSWORD: thunguyen003
+5/ STAFF    USERNAME: tienphan@gmail.com, PASSWORD: tienphan004
+6/ STAFF    USERNAME: ngocha@gmail.com, PASSWORD: ngocha005
+7/ STAFF    USERNAME: dainguyen@gmail.com, PASSWORD: dainguyen006
+8/ STAFF    USERNAME: namnguyen@gmail.com, PASSWORD: namnguyen008
